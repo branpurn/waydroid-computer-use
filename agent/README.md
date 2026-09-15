@@ -1,5 +1,5 @@
-# Agent loop (Backend)
+# Agent loop
 
-Owned by **Backend Developer**.
+Consumes control primitives (see `control/`) and emits actions matching `control/schema.json`.
 
-Expected to consume Infra control primitives (see `control/`) and emit the action schema in `docs/architecture.md`.
+TypeScript interfaces are welcome; bash ADB wrappers remain the lowest-level control path. Talk only to a configurable pluggable backend — no deployment topology in code.
