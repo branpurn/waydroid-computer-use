@@ -41,3 +41,41 @@ export { StubBackend } from "./backends/stub.js";
 /** Optional/dev fallback only — prefer HttpControlBackend. */
 export type { AdbCliBackendOptions } from "./backends/adb_cli.js";
 export { AdbCliBackend } from "./backends/adb_cli.js";
+
+/** PoC: Play Store → tic-tac-toe → win */
+export type {
+  Board,
+  Cell,
+  CellMark,
+  PocPhase,
+  Scene,
+  SceneKind,
+  ScreenLayout,
+  TapPoint,
+  Perception,
+  HeuristicPerceptionOptions,
+  TicTacToePocPolicyOptions,
+} from "./poc/index.js";
+export {
+  DEFAULT_SEARCH_QUERY,
+  KEYCODE_APP_SWITCH,
+  KEYCODE_BACK,
+  KEYCODE_HOME,
+  WIN_REASON,
+  cloneBoard,
+  emptyBoard,
+  HeuristicPerception,
+  CENTER,
+  CORNERS,
+  SIDES,
+  WIN_LINES,
+  boardToString,
+  chooseMove,
+  chooseWeakMove,
+  emptyCells,
+  opponent,
+  parseBoard,
+  place,
+  winnerOf,
+  TicTacToePocPolicy,
+} from "./poc/index.js";
