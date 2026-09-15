@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/branpurn/waydroid-computer-use/control/schema.json",
+  "title": "WaydroidComputerUseAction",
+  "description": "Action envelope for Waydroid computer-use control plane",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["op"],
+      "properties": { "op": { "const": "screenshot" } },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["op", "x", "y"],
+      "properties": {
+        "op": { "const": "tap" },
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["op", "x1", "y1", "x2", "y2"],
+      "properties": {
+        "op": { "const": "swipe" },
+        "x1": { "type": "integer", "minimum": 0 },
+        "y1": { "type": "integer", "minimum": 0 },
+        "x2": { "type": "integer", "minimum": 0 },
+        "y2": { "type": "integer", "minimum": 0 },
+        "duration_ms": { "type": "integer", "minimum": 0, "default": 300 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["op", "text"],
+      "properties": {
+        "op": { "const": "type" },
+        "text": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["op", "code"],
+      "properties": {
+        "op": { "const": "keyevent" },
+        "code": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  ]
+}
