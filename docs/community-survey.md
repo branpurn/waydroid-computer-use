@@ -1,6 +1,6 @@
 # Community survey (Android computer-use)
 
-Infra fills this after the live survey pass. Candidates to evaluate:
+Fill after the live survey pass. Candidates to evaluate:
 
 ## Mobile GUI agents
 
