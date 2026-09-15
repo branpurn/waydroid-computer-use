@@ -62,3 +62,44 @@ const result = await loop.run();
 - `keyevent`: `{ op, code }` integer ≥ 0
 
 Do not fork a local `control/schema.json`; copy types from main.
+
+## PoC policy: `TicTacToePocPolicy`
+
+Phased DecisionEngine for the done flag: **Play Store → search/install/open a tic-tac-toe app → play → win**.
+
+```ts
+import {
+  AgentLoop,
+  HttpControlBackend,
+  TicTacToePocPolicy,
+  type ScreenLayout,
+} from "@waydroid-computer-use/agent";
+
+const layout: ScreenLayout = {
+  playStoreTap: { x: /* … */, y: /* … */ },
+  searchFieldTap: { x: /* … */, y: /* … */ },
+  firstResultTap: { x: /* … */, y: /* … */ },
+  installTap: { x: /* … */, y: /* … */ },
+  openTap: { x: /* … */, y: /* … */ },
+  boardCells: [/* 9 {x,y} row-major */],
+};
+
+const policy = new TicTacToePocPolicy({
+  layout,
+  searchQuery: "tic tac toe", // optional
+  ourMark: "X",               // optional; "O" to play second
+  // perception: new VlmPerception(…), // optional; default HeuristicPerception
+});
+
+const loop = new AgentLoop({
+  backend: new HttpControlBackend({ baseUrl: process.env.CONTROL_BASE_URL! }),
+  policy,
+  maxSteps: 200,
+});
+const result = await loop.run();
+// done: result.reason === "poc: tic-tac-toe win"
+```
+
+- Actions stay on the existing union: `screenshot|tap|swipe|type|keyevent` + loop-local `wait|stop`. No `open_app`.
+- Default `HeuristicPerception` is **history-driven** (does not read PNG bytes). Swap a real VLM/OCR perception without rewriting the phase machine.
+- See `docs/poc-tic-tac-toe.md` for phases and config knobs.
