@@ -2,26 +2,28 @@
 
 ## Goal
 
-Let a Grok Bot **see** and **act** on a Waydroid Android UI: screenshot → decide → tap/swipe/type, with a path to install Play Store apps for a real PoC.
+Let an agent **see** and **act** on a Waydroid Android UI: screenshot → decide → tap/swipe/type, with a path to install Play Store apps for a real PoC.
+
+## Environment assumption
+
+**Waydroid on Fedora** only. Connectivity to that host is external configuration (SSH/VPN/tunnel/etc.), not part of the core design. See `.env.example`.
 
 ## Layers
 
-1. **Operator / viewer (Frontend)** — human-facing stream of frames + optional manual override.
-2. **Agent loop (Backend)** — vision/policy → action schema → calls control plane.
-3. **Control plane (Infra)** — reliable primitives on the Waydroid host:
+1. **Operator / viewer** — human-facing stream of frames + optional manual override.
+2. **Agent loop** — vision/policy → action schema → calls control plane.
+3. **Control plane** — reliable primitives on the Waydroid host:
    - `screenshot` → PNG bytes / path
    - `tap(x, y)`
    - `swipe(x1,y1,x2,y2,duration_ms?)`
    - `type(text)` / `keyevent(code)`
 4. **Runtime** — Waydroid session on Fedora; ADB into the Android container; optional Fedora-side helpers (display capture, systemd, packaging).
 
-## Access path
+## Action schema
 
-Agents Shell on **pop-os**, then SSH to the forwarded port from the Waydroid host’s reverse tunnel (`localhost:2201`). Do not anchor tunnels on macbook (it goes down often). The Waydroid host itself also reboots often; `waydroid-reverse-tunnel.service` uses `Restart=always`.
+Canonical JSON Schema: [`control/schema.json`](../control/schema.json).
 
-## Action schema (proposed for Backend)
-
-Keep actions small and absolute-pixel based initially (match screenshot resolution):
+Example envelope:
 
 ```json
 {"op":"screenshot"}
@@ -31,8 +33,8 @@ Keep actions small and absolute-pixel based initially (match screenshot resoluti
 {"op":"keyevent","code":3}
 ```
 
-Backend may wrap these in higher-level skills later; Infra guarantees the primitives.
+Higher-level skills can wrap these later; the control plane guarantees the primitives.
 
 ## Play Store
 
-PoC needs GAPPS / Play Store on the Waydroid image. Infra unblocks install path; app install + match play is the integration test.
+PoC needs GAPPS / Play Store on the Waydroid image. Unblock install path on Fedora+Waydroid; app install + match play is the integration test.
