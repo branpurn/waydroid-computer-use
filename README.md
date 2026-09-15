@@ -1,36 +1,37 @@
 # waydroid-computer-use
 
-Android **computer-use** stack for [Waydroid](https://waydro.id/) (Android in a container on Fedora): see the screen, tap/swipe/type, and drive apps from Grok Bot agents.
+Android **computer-use** stack for [Waydroid](https://waydro.id/) on **Fedora**: see the screen, tap/swipe/type, and drive apps from an agent.
 
 **PoC done flag:** install a tic-tac-toe game from the Play Store and **win a match** via this stack.
 
-## Team
+## Assumptions
 
-| Role | Owns |
-|------|------|
-| **Infra** | Control primitives, Play Store path, host access |
-| **Backend** | Agent loop |
-| **Frontend** | Operator / viewer UI |
-| Off limits | Generalist, Secretary |
+- **Waydroid on Fedora** is the only environment assumption.
+- How you reach that host (SSH, VPN, LAN, reverse tunnel, etc.) is **your** deployment concern — configure it; do not hardcode lab topology in this repo.
 
-## Reach the Waydroid host
+## Configuration
 
-Reverse SSH rendezvous is **pop-os only** (never macbook):
+Copy `.env.example` → `.env` (never commit `.env`) or export the same variables:
 
-```bash
-ssh -p 2201 -i ~/.ssh/waydroid_agents -o StrictHostKeyChecking=accept-new waydroid@127.0.0.1
-```
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `WAYDROID_SSH_HOST` | Reachable hostname/IP of the Fedora/Waydroid host | `waydroid.example` |
+| `WAYDROID_SSH_PORT` | SSH port | `22` |
+| `WAYDROID_SSH_USER` | SSH user | `waydroid` |
+| `WAYDROID_SSH_IDENTITY` | Optional private key path | `~/.ssh/id_ed25519` |
+| `ADB_SERIAL` | Optional `adb -s` serial | `emulator-5554` |
+| `ADB` | adb binary override | `adb` |
 
-Optional later: `adb connect 127.0.0.1:5555` (when adbd is forwarded).
+Helper: `scripts/ssh-waydroid.sh` wraps SSH using those variables.
 
 ## Architecture (sketch)
 
 ```mermaid
 flowchart LR
-  UI[Frontend operator/viewer] --> Loop[Backend agent loop]
-  Loop --> Ctrl[Infra control plane]
-  Ctrl -->|ADB / Fedora tools| WD[Waydroid Android]
-  Ctrl -.->|host helpers| Fed[Fedora host]
+  UI[Operator / viewer UI] --> Loop[Agent loop]
+  Loop --> Ctrl[Control plane]
+  Ctrl -->|ADB / host tools| WD[Waydroid Android]
+  Ctrl -.->|optional| Fed[Fedora host]
 ```
 
 - **ADB** is the primary control path (screenshot, `input tap/swipe/text`, keyevents).
@@ -39,9 +40,10 @@ flowchart LR
 ## Repo layout
 
 ```
-control/     # screenshot / tap / swipe / type primitives (Infra)
-agent/       # agent loop (Backend) — stub
-ui/          # operator/viewer (Frontend) — stub
+control/     # screenshot / tap / swipe / type primitives + action JSON Schema
+agent/       # agent loop
+ui/          # operator/viewer UI
+scripts/     # SSH/ADB helpers driven by env config
 docs/        # architecture, community survey
 ```
 
@@ -49,10 +51,10 @@ docs/        # architecture, community survey
 
 | Area | Status |
 |------|--------|
-| Host access (reverse SSH) | Live |
-| README / architecture | In progress |
-| Control primitives | In progress |
-| Play Store / GAPPS | Probing |
+| README / architecture (generic) | Current |
+| Control primitives (ADB stubs) | Scaffolded |
+| Action JSON Schema | `control/schema.json` |
+| Play Store / GAPPS | In progress |
 | Community survey | In progress |
 | PoC tic-tac-toe win | Not started |
 
