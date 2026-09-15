@@ -1,4 +1,4 @@
-# Control primitives (Infra)
+# Control primitives
 
 Reliable, scriptable actions against the Waydroid Android UI.
 
@@ -13,6 +13,10 @@ Reliable, scriptable actions against the Waydroid Android UI.
 | `keyevent code` | Android keycode (HOME=3, BACK=4, …) |
 
 Primary implementation: **ADB**. Secondary: Fedora/Waydroid host tools when ADB is insufficient.
+
+Configure `ADB` / `ADB_SERIAL` via environment (see `.env.example`).
+
+Canonical action JSON Schema: [`schema.json`](./schema.json).
 
 ## Scripts
 
