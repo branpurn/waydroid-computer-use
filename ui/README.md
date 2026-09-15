@@ -1,5 +1,5 @@
-# Operator / viewer UI (Frontend)
+# Operator / viewer UI
 
-Owned by **Frontend Developer**.
+Shows live/recent frames from control screenshots and optional manual override of taps.
 
-Expected to show live/recent frames from Infra screenshots and optional manual override of taps.
+Use a configurable base URL for frame/action APIs — do not hardcode deployment hosts.
