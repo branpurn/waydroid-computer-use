@@ -23,6 +23,10 @@ ADB = os.environ.get("ADB", "adb")
 SERIAL = os.environ.get("ADB_SERIAL", "").strip()
 CORS = os.environ.get("CONTROL_CORS", "*")
 
+from collections import deque
+
+RECENT: deque = deque(maxlen=50)
+
 ACTIONS = [
     {"op": "screenshot"},
     {"op": "tap", "x": 0, "y": 0},
@@ -90,7 +94,18 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(503, {"ok": False, "error": "adb_not_found"})
             return
         if path == "/actions":
-            self._json(200, {"actions": ACTIONS})
+            # `actions` = schema catalog; `recent` = last executed ops (for overlays)
+            limit = 20
+            q = urlparse(self.path).query
+            for part in q.split("&"):
+                if part.startswith("limit="):
+                    try:
+                        limit = max(1, min(50, int(part.split("=", 1)[1])))
+                    except ValueError:
+                        pass
+            recent = list(RECENT)[-limit:]
+            recent.reverse()  # newest first
+            self._json(200, {"actions": ACTIONS, "recent": recent})
             return
         if path == "/frame":
             try:
@@ -128,23 +143,23 @@ class Handler(BaseHTTPRequestHandler):
             if op == "tap":
                 x, y = int(body["x"]), int(body["y"])
                 run(adb_cmd("shell", "input", "tap", str(x), str(y)))
-                self._json(200, {"ok": True, "op": "tap", "x": x, "y": y})
+                evt={"op":"tap","x":x,"y":y}; RECENT.append(evt); self._json(200, {"ok": True, **evt})
                 return
             if op == "swipe":
                 x1, y1, x2, y2 = int(body["x1"]), int(body["y1"]), int(body["x2"]), int(body["y2"])
                 dur = int(body.get("duration_ms", 300))
                 run(adb_cmd("shell", "input", "swipe", str(x1), str(y1), str(x2), str(y2), str(dur)))
-                self._json(200, {"ok": True, "op": "swipe"})
+                evt={"op":"swipe","x1":x1,"y1":y1,"x2":x2,"y2":y2,"duration_ms":dur}; RECENT.append(evt); self._json(200, {"ok": True, **evt})
                 return
             if op == "type":
                 text = str(body["text"]).replace(" ", "%s")
                 run(adb_cmd("shell", "input", "text", text))
-                self._json(200, {"ok": True, "op": "type"})
+                evt={"op":"type","text":body.get("text","")}; RECENT.append(evt); self._json(200, {"ok": True, "op":"type"})
                 return
             if op == "keyevent":
                 code = int(body["code"])
                 run(adb_cmd("shell", "input", "keyevent", str(code)))
-                self._json(200, {"ok": True, "op": "keyevent", "code": code})
+                evt={"op":"keyevent","code":code}; RECENT.append(evt); self._json(200, {"ok": True, **evt})
                 return
             self._json(400, {"ok": False, "error": "unknown_op", "op": op})
         except KeyError as e:
