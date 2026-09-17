@@ -1,0 +1,14 @@
+[Unit]
+Description=Waydroid computer-use control HTTP API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/bin/waydroid-control-start.sh
+Restart=always
+RestartSec=5
+TimeoutStartSec=90
+
+[Install]
+WantedBy=default.target

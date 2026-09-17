@@ -79,3 +79,31 @@ If the container is frozen, `/health` should fail fast with `adb_ops_hung` / `co
 ## Related ADB auth note
 
 If `adb devices` shows `unauthorized`, inject the host `~/.android/adbkey.pub` into the guest `adb_keys` (via `waydroid shell`) and restart `adbd`, then reconnect. Details vary by image; keep keys off git.
+
+## Keep control HTTP alive with systemd
+
+The repository includes a generalized user-service template and launcher under `deploy/systemd/`. The launcher discovers the current Waydroid guest IP, reconnects ADB, exports `ADB_SERIAL`, and starts the control server. The service uses `Restart=always`, so a failed launcher or control process is retried.
+
+Install it for the user that owns the Waydroid session:
+
+```bash
+mkdir -p "$HOME/bin" "$HOME/.config/systemd/user"
+install -m 0755 deploy/systemd/waydroid-control-start.sh "$HOME/bin/waydroid-control-start.sh"
+install -m 0644 deploy/systemd/waydroid-control.service \
+  "$HOME/.config/systemd/user/waydroid-control.service"
+
+systemctl --user daemon-reload
+systemctl --user enable --now waydroid-control.service
+systemctl --user status waydroid-control.service
+```
+
+The launcher assumes the repository lives at `$HOME/waydroid-computer-use`. Override `CONTROL_SCRIPT` in a systemd drop-in when installed elsewhere:
+
+```ini
+[Service]
+Environment=CONTROL_SCRIPT=/absolute/path/to/control/http_server.py
+```
+
+Useful optional environment overrides are `CONTROL_HOST`, `CONTROL_PORT`, `ADB_SERIAL`, `WAYDROID_IP_TIMEOUT`, `ADB_CONNECT_TIMEOUT`, and the ADB operation timeout variables described above. When `ADB_SERIAL` is unset, the launcher re-discovers the guest address on every service start.
+
+This service complements the stay-on and unfreeze watchdog recommendations above: the control service restarts the HTTP/ADB path, while the watchdog handles an LXC payload that Waydroid has frozen.
