@@ -1,0 +1,6 @@
+[Unit]
+Description=Restart Waydroid control HTTP if /health is not ok
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/waydroid-control-healthcheck.sh

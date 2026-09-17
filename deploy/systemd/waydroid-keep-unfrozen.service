@@ -1,0 +1,6 @@
+[Unit]
+Description=Unfreeze Waydroid LXC payload if frozen
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/waydroid-keep-unfrozen.sh
